@@ -43,6 +43,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (experiment && framework && count) {
         document.body.classList.add('ready');
+
+        // !! global variable
+        window.experiment = {};
+        window.experiment.doLoop = true;
+        window.experiment.before = () => {};
+        window.experiment.render = () => {};
+        window.experiment.shapes = generateShapes();
+        window.experiment.canvas = document.getElementById('canvas');
+
+        // start animation
+        requestAnimationFrame(function animate() {
+            window.experiment.before();
+            window.experiment.render();
+            if (window.experiment.doLoop) {
+                requestAnimationFrame(animate);
+            }
+        });
+
         const promises = FRAMEWORKS.find(f => f.name === framework).scripts
             .map(src => appendElement('script', document.head, { src }))
             .map(el => new Promise(resolve => el.onload = resolve))
