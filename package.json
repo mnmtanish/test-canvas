@@ -1,0 +1,14 @@
+{
+  "name": "test-canvas",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "http-server ./experiments"
+  },
+  "keywords": [],
+  "author": "Muhammed Thanish <mnmtanish@gmail.com> (http://thanish.me/)",
+  "license": "MIT",
+  "dependencies": {
+    "http-server": "^0.10.0"
+  }
+}
