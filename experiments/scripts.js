@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
     experiment.before = () => {};
     experiment.render = () => {};
     experiment.select = shape => {};
-    experiment.selected = null;
+    experiment.selected = { moving: false, dirty: false, shapes: [] };
     experiment.unselect = shape => {};
     experiment.updateXY = shape => {};
     experiment.shapes = generateShapes(query.n);
@@ -69,8 +69,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // start animation
     requestAnimationFrame(function animate() {
-        if (experiment.selected) {
-            experiment.updateXY(experiment.selected.shape);
+        if (experiment.selected.dirty) {
+            experiment.selected.dirty = false;
+            experiment.selected.shapes.forEach(shape => experiment.updateXY(shape));
         }
         experiment.before();
         experiment.render();
@@ -88,25 +89,63 @@ document.addEventListener('DOMContentLoaded', function () {
     Promise.all(promises)
         .then(() => appendElement('script', document.head, { src: `./${query.e}/${query.f}.js` }));
 
-    // add mouse events
+    // add mousedown event
     experiment.clicks.addEventListener('mousedown', e => {
         const shape = getShapeAtPos(experiment.shapes, e.x, e.y);
-        if (shape) {
-            experiment.selected = { shape, ox: e.x - shape.x, oy: e.y - shape.y };
-            experiment.select(shape);
+        const shapeIndex = experiment.selected.shapes.findIndex(s => s === shape);
+
+        if (!e.shiftKey) {
+            if (!shape) {
+                // When user clicks on the blank area, clear the selection.
+                experiment.selected.shapes.forEach(s => experiment.unselect(s));
+                experiment.selected.dirty = false;
+                experiment.selected.shapes = [];
+                experiment.selected.offsets = [];
+            } else if (shapeIndex === -1) {
+                // When user clicks on a shape which is not selected, select it.
+                experiment.selected.shapes.forEach(s => experiment.unselect(s));
+                experiment.selected.moving = true;
+                experiment.selected.shapes = [shape];
+                experiment.selected.offsets = [{ ox: e.x - shape.x, oy: e.y - shape.y }];
+                experiment.select(shape);
+            } else {
+                // When user clicks on a selected shape, update shape offsets.
+                experiment.selected.moving = true;
+                experiment.selected.offsets = experiment.selected.shapes.map(s => {
+                    return { ox: e.x - s.x, oy: e.y - s.y };
+                });
+            }
+        } else {
+            if (!shape) {
+                return;
+            } else if (shapeIndex === -1) {
+                // When user clicks on a shape which is not selected, select it.
+                experiment.selected.shapes.push(shape)
+                experiment.selected.offsets.push({ ox: e.x - shape.x, oy: e.y - shape.y });
+                experiment.select(shape);
+            } else {
+                // When user clicks on a selected shape, remove it from selection.
+                experiment.selected.shapes.splice(shapeIndex, 1);
+                experiment.selected.offsets.splice(shapeIndex, 1);
+                experiment.unselect(shape);
+            }
         }
     });
+
+    // add mouseup event
     experiment.clicks.addEventListener('mouseup', e => {
-        if (experiment.selected) {
-            experiment.unselect(experiment.selected.shape);
-            experiment.selected = null;
-        }
+        experiment.selected.moving = false;
     });
+
+    // add mousemove event
     experiment.clicks.addEventListener('mousemove', e => {
-        if (experiment.selected) {
-            const { shape, ox, oy } = experiment.selected;
-            shape.x = e.x - ox;
-            shape.y = e.y - oy;
+        if (experiment.selected.moving) {
+            experiment.selected.dirty = true;
+            experiment.selected.shapes.forEach((shape, idx) => {
+                const { ox, oy } = experiment.selected.offsets[idx];
+                shape.x = e.x - ox;
+                shape.y = e.y - oy;
+            });
         }
     });
 });
