@@ -16,9 +16,9 @@ experiment.render = () => {
 };
 
 experiment.before = () => {
-    const delta = 50 + 50 * Math.sin(Date.now()/1000);
+    const seconds = Date.now() / 1000;
     experiment.shapes.forEach(shape => {
-        const left = shape.x + delta;
-        shape.view.set('left', left);
+        shape.view.set('left', shape.x + 100 * Math.sin(shape.x * shape.y + seconds));
+        shape.view.set('top', shape.y + 100 * Math.sin(shape.x * shape.y + seconds));
     });
 };

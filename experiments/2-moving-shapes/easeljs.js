@@ -14,8 +14,9 @@ experiment.render = () => {
 };
 
 experiment.before = () => {
-    const delta = 50 + 50 * Math.sin(Date.now()/1000);
+    const seconds = Date.now() / 1000;
     experiment.shapes.forEach(shape => {
-        shape.view.x = shape.x + delta;
+        shape.view.x = shape.x + 100 * Math.sin(shape.x * shape.y + seconds);
+        shape.view.y = shape.y + 100 * Math.sin(shape.x * shape.y + seconds);
     });
 };
