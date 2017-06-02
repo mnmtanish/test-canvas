@@ -1,5 +1,6 @@
 const EXPERIMENTS = [
     { name: '1-idle-shapes' },
+    { name: '2-moving-shapes' },
 ];
 
 const FRAMEWORKS = [
