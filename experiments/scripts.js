@@ -36,6 +36,15 @@ function generateShapes(n) {
     return shapes;
 }
 
+function getShapeAtPos(shapes, x, y) {
+    return shapes.find(shape => {
+        return shape.y <= y &&
+            shape.y + shape.h >= y &&
+            shape.x <= x &&
+            shape.x + shape.w >= x;
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     const query = getQueryParams();
 
@@ -49,6 +58,10 @@ document.addEventListener('DOMContentLoaded', function () {
     experiment.doLoop = true;
     experiment.before = () => {};
     experiment.render = () => {};
+    experiment.select = shape => {};
+    experiment.selected = null;
+    experiment.unselect = shape => {};
+    experiment.updateXY = shape => {};
     experiment.shapes = generateShapes(query.n);
     experiment.canvas = document.getElementById('canvas');
     experiment.extras = document.getElementById('extras');
@@ -56,6 +69,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // start animation
     requestAnimationFrame(function animate() {
+        if (experiment.selected) {
+            experiment.updateXY(experiment.selected.shape);
+        }
         experiment.before();
         experiment.render();
         if (experiment.doLoop) {
@@ -71,4 +87,26 @@ document.addEventListener('DOMContentLoaded', function () {
     // add experiment js
     Promise.all(promises)
         .then(() => appendElement('script', document.head, { src: `./${query.e}/${query.f}.js` }));
+
+    // add mouse events
+    experiment.clicks.addEventListener('mousedown', e => {
+        const shape = getShapeAtPos(experiment.shapes, e.x, e.y);
+        if (shape) {
+            experiment.selected = { shape, ox: e.x - shape.x, oy: e.y - shape.y };
+            experiment.select(shape);
+        }
+    });
+    experiment.clicks.addEventListener('mouseup', e => {
+        if (experiment.selected) {
+            experiment.unselect(experiment.selected.shape);
+            experiment.selected = null;
+        }
+    });
+    experiment.clicks.addEventListener('mousemove', e => {
+        if (experiment.selected) {
+            const { shape, ox, oy } = experiment.selected;
+            shape.x = e.x - ox;
+            shape.y = e.y - oy;
+        }
+    });
 });
