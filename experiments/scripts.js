@@ -1,8 +1,3 @@
-const EXPERIMENTS = [
-    { name: '1-idle-shapes' },
-    { name: '2-moving-shapes' },
-];
-
 const FRAMEWORKS = [
     { name: 'fabricjs', scripts: [ '../_frameworks/fabricjs.js' ] },
     { name: 'paperjs', scripts: [ '../_frameworks/paperjs.js' ] },
@@ -23,16 +18,18 @@ function appendElement(name, parent, props = {}) {
     return tag;
 }
 
-function generateShapes() {
-    const { count } = getQueryParams();
+function generateShapes(n) {
     const cols = 100;
-    const rows = count/cols;
+    const rows = Math.floor(n/cols);
     const shapes = [];
-    const w = 10, h = 10;
+    const W = 1920, H = 984;
+    const w = 10, h = 10, s = 5;
+    const dx = (W - (cols * w + (cols - 1) * s))/2;
+    const dy = (H - (rows * h + (rows - 1) * s))/2;
     for (let row = 0; row < rows; ++row) {
         for (let col = 0; col < cols; ++col) {
-            const x = 5 + col * 15;
-            const y = 5 + row * 15;
+            const x = dx + col * (w + s);
+            const y = dy + row * (h + s);
             shapes.push({ w, h, x, y });
         }
     }
@@ -40,46 +37,38 @@ function generateShapes() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    const { experiment, framework, count } = getQueryParams();
+    const query = getQueryParams();
 
-    if (experiment && framework && count) {
-        document.body.classList.add('ready');
-
-        // !! global variable
-        window.experiment = {};
-        window.experiment.doLoop = true;
-        window.experiment.before = () => {};
-        window.experiment.render = () => {};
-        window.experiment.shapes = generateShapes();
-        window.experiment.canvas = document.getElementById('canvas');
-
-        // start animation
-        requestAnimationFrame(function animate() {
-            window.experiment.before();
-            window.experiment.render();
-            if (window.experiment.doLoop) {
-                requestAnimationFrame(animate);
-            }
-        });
-
-        const promises = FRAMEWORKS.find(f => f.name === framework).scripts
-            .map(src => appendElement('script', document.head, { src }))
-            .map(el => new Promise(resolve => el.onload = resolve))
-        Promise.all(promises)
-            .then(() => appendElement('script', document.head, { src: `./${experiment}/${framework}.js` }))
+    if (!query.e || !query.f || !query.n) {
+        alert('please set query params "e", "f" and "n"');
         return;
     }
 
-    const table = document.getElementById('experiment-list');
-    EXPERIMENTS.forEach(e => {
-        const tr = appendElement('tr', table);
-        const td = appendElement('td', tr, { innerHTML: e.name });
-        FRAMEWORKS.forEach(f => {
-            const td = appendElement('td', tr, { innerHTML: `${f.name} - ` });
-            [ 100, 200, 500, 1000 ].forEach(n => {
-                const href = `?experiment=${e.name}&framework=${f.name}&count=${n}`;
-                appendElement('a', td, { innerHTML: n, href });
-            });
-        });
+    // !! global var
+    experiment = {};
+    experiment.doLoop = true;
+    experiment.before = () => {};
+    experiment.render = () => {};
+    experiment.shapes = generateShapes(query.n);
+    experiment.canvas = document.getElementById('canvas');
+    experiment.extras = document.getElementById('extras');
+    experiment.clicks = document.getElementById('clicks');
+
+    // start animation
+    requestAnimationFrame(function animate() {
+        experiment.before();
+        experiment.render();
+        if (experiment.doLoop) {
+            requestAnimationFrame(animate);
+        }
     });
+
+    // add framework js
+    const promises = FRAMEWORKS.find(f => f.name === query.f).scripts
+        .map(src => appendElement('script', document.head, { src }))
+        .map(el => new Promise(resolve => el.onload = resolve))
+
+    // add experiment js
+    Promise.all(promises)
+        .then(() => appendElement('script', document.head, { src: `./${query.e}/${query.f}.js` }));
 });

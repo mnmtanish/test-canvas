@@ -1,12 +1,21 @@
-body { margin: 0; display: flex; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-a { color: #333; text-decoration: none; }
-#introduction { display: flex; flex: 1; align-items: center; justify-content: center; }
-#experiment-list { font-family: monospace; }
-#experiment-list td { padding: 5px 20px; }
-#experiment-list a { padding: 0 2px; }
-body.ready #introduction { display: none; }
-#experiment { display: none; }
-body.ready #experiment { display: flex; flex: 1; flex-direction: column; }
-body.ready #header { display: flex; height: 84; box-sizing: border-box; align-items: center; justify-content: center; background: #eee; border-bottom: solid 1px #ccc; }
-body.ready #header > button { display: inline-block; margin: 0 5px; padding: 4px 12px; background: #ddd; border: solid 1px #333; font-size: 12px; box-sizing: border-box; }
-body.ready #canvas { flex: 1; }
+body {
+    margin: 0;
+}
+
+.fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+#canvas {
+    z-index: 1;
+}
+
+#extras {
+    z-index: 2;
+}
+
+#clicks {
+    z-index: 3;
+}
