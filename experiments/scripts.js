@@ -2,6 +2,7 @@ const FRAMEWORKS = [
     { name: 'fabricjs', scripts: [ '../_frameworks/fabricjs.js' ] },
     { name: 'paperjs', scripts: [ '../_frameworks/paperjs.js' ] },
     { name: 'easeljs', scripts: [ '../_frameworks/easeljs.js', '../_frameworks/tweenjs.js' ] },
+    { name: 'easeljs-d', scripts: [ '../_frameworks/easeljs.js', '../_frameworks/tweenjs.js' ] },
 ];
 
 function getQueryParams() {
