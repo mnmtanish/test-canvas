@@ -1,4 +1,5 @@
 const FRAMEWORKS = [
+    { name: 'canvas', scripts: [] },
     { name: 'fabricjs', scripts: [ '../_frameworks/fabricjs.js' ] },
     { name: 'paperjs', scripts: [ '../_frameworks/paperjs.js' ] },
     { name: 'easeljs', scripts: [ '../_frameworks/easeljs.js', '../_frameworks/tweenjs.js' ] },
