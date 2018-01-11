@@ -1,12 +1,10 @@
 paper.setup(experiment.canvas);
-
-experiment.shapes.forEach(shape => {
-    const point = new paper.Point(shape.x,shape.y);
-    const size = new paper.Size(shape.w,shape.h);
+experiment.shapes.forEach(function (shape) {
+    var point = new paper.Point(shape.x, shape.y);
+    var size = new paper.Size(shape.w, shape.h);
     shape.view = new paper.Path.Rectangle(point, size);
     shape.view.fillColor = '#aaa';
 });
-
-experiment.render = () => {
+experiment.render = function () {
     paper.view.draw();
 };
