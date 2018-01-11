@@ -1,6 +1,5 @@
-const canvas = new fabric.Canvas('canvas', { renderOnAddRemove: false });
-
-experiment.shapes.forEach(shape => {
+var canvas = new fabric.Canvas('canvas', { renderOnAddRemove: false });
+experiment.shapes.forEach(function (shape) {
     shape.view = new fabric.Rect({
         left: shape.x,
         top: shape.y,
@@ -10,7 +9,6 @@ experiment.shapes.forEach(shape => {
     });
     canvas.add(shape.view);
 });
-
-experiment.render = () => {
+experiment.render = function () {
     canvas.renderAll();
 };
